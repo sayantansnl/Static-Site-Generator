@@ -4,6 +4,13 @@ from pathlib import Path
 
 import os
 import shutil
+import sys
+
+if len(sys.argv) < 2:
+    basepath = "/"
+else: 
+    basepath = sys.argv[1]
+
 
 def copy_directory_contents(source_dir, destination_dir):
     if os.path.isfile(source_dir):
@@ -25,8 +32,9 @@ def generate_page(from_path, template_path, dest_path):
     
     html_string = markdown_to_html_node(from_path_content).to_html()
     page_title = extract_title(from_path_content)
-
-    new_template_path_content = template_path_content.replace("{{ Title }}", page_title).replace("{{ Content }}", html_string)
+    href_replacement = f'href="{basepath}'
+    src_replacement = f'src="{basepath}'
+    new_template_path_content = template_path_content.replace("{{ Title }}", page_title).replace("{{ Content }}", html_string).replace('href="/', href_replacement).replace('src="/', src_replacement)
     dir_name = os.path.dirname(dest_path)
     if dir_name:
         os.makedirs(dir_name, exist_ok=True)
@@ -47,14 +55,10 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
 
 
 def main():
-    # text_node = TextNode("This is some anchor text", TextType.LINK, "https://www.boot.dev")
-    # print(text_node.__repr__())
-    # print(copy_directory_contents("../static/images"))
-
-    destination_path = os.path.expanduser("~/static-site-generator/public")
-    source_path = os.path.expanduser("~/static-site-generator/static")
-    from_path = os.path.expanduser("~/static-site-generator/content/")
-    template_path = os.path.expanduser("~/static-site-generator/template.html")
+    destination_path = "./docs"
+    source_path = "./static"
+    from_path = "./content"
+    template_path = "./template.html"
     if os.path.exists(destination_path):
         shutil.rmtree(destination_path)
     
